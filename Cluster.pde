@@ -7,8 +7,9 @@ class Cluster {
   private ArrayList<PVector> prevClusterCenter;
   private ArrayList<PVector> clusterCenter;
   private PImage img;
-  private PVector[] imgPixels;
-  private int nearestCluster[];
+  private PVector[] pixelColor;
+  private int[] nearestCluster;
+  
   /*
    * @constructor
    */
@@ -17,12 +18,12 @@ class Cluster {
     this.img = img;
 
     initializeClusterCenter();
-    initializeImgPixels();
+    initializepixelColor();
     initializeNearestCluster();
   }
   
   private void initializeClusterCenter() {
-    this.prevClusterCenter =new ArrayList<PVector>();
+    this.prevClusterCenter = new ArrayList<PVector>();
     this.clusterCenter = new ArrayList<PVector>();
     for (int i = 0; i < k; i++) {
       PVector p = new PVector(random(0, 100),
@@ -33,10 +34,10 @@ class Cluster {
     }
   }
   
-  private void initializeImgPixels() {
-    this.imgPixels = new PVector[img.width * img.height];
+  private void initializepixelColor() {
+    this.pixelColor = new PVector[img.width * img.height];
     for (int i = 0; i < img.width * img.height; i++) {
-      this.imgPixels[i] = RGB2Lab(img.pixels[i]);
+      this.pixelColor[i] = RGB2Lab(img.pixels[i]);
     }
   }
   
@@ -55,10 +56,10 @@ class Cluster {
   
   private void findNearestCluster() {
     for (int i = 0; i < img.width * img.height; i++) {
-      float nearestDistance = calculateDistance(prevClusterCenter.get(0), imgPixels[i]);
+      float nearestDistance = calculateDistance(prevClusterCenter.get(0), pixelColor[i]);
       this.nearestCluster[i] = 0;
       for (int j = 1; j < k; j++) {
-        float distance = calculateDistance(prevClusterCenter.get(j), imgPixels[i]);
+        float distance = calculateDistance(prevClusterCenter.get(j), pixelColor[i]);
         if (distance < nearestDistance) {
           nearestDistance = distance;
           this.nearestCluster[i] = j;
@@ -79,7 +80,7 @@ class Cluster {
     for (int i = 0; i < img.width * img.height; i++) {
       int index = nearestCluster[i];
       count[index]++;
-      sum[index].add(imgPixels[i]);
+      sum[index].add(pixelColor[i]);
     }
     
     for (int i = 0; i < k; i++) {
@@ -133,5 +134,17 @@ class Cluster {
     img.updatePixels();
     
     image(img, 512, 0);
+  }
+  
+  public PVector[] getPixelColor() {
+    return this.pixelColor;
+  }
+  
+  public int[] getNearestCluster() {
+    return this.nearestCluster;
+  }
+  
+  public ArrayList<PVector> getClusterCenter() {
+    return this.clusterCenter;
   }
 }

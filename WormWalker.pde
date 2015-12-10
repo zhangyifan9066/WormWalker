@@ -1,51 +1,62 @@
-PImage refImg;
-PVector[] pixelColor;
-int[] nearestCluster;
-ArrayList<ArrayList<Integer>> colorGroup;
+// input
+String imgName;
+PImage img;
+int imgWidth;
+int imgHeight;
+int totalPixel;
+int totalCluster;
 int totalWorm;
+
+PVector[] clusterColor;
+int[] nearestCluster;
+PVector[] pixelColor;
+
+ArrayList<ArrayList<Integer>> colorGroup;
 ArrayList<Worm> worms;
 
 void setup() {
-  int k = 5;
-  totalWorm = 10;
-  
   size(1024, 512);
-  refImg = loadImage("lena.gif");
-  image(refImg, 0, 0);
-  Cluster c = new Cluster(k, refImg); //<>//
+  
+  imgName = "lena.gif";
+  totalCluster = 10;
+  totalWorm = 30;
+  
+  loadImg(imgName);
+  
+  Cluster c = new Cluster(totalCluster); //<>//
   c.act();
   c.rendering();
-  
-  pixelColor = new PVector[refImg.width * refImg.height];
-  nearestCluster = new int[refImg.width * refImg.height];
-  ArrayList<PVector> clusterColor = new ArrayList<PVector>();
-  colorGroup = new ArrayList<ArrayList<Integer>>();
-  
-  pixelColor = c.getPixelColor();
-  nearestCluster = c.getNearestCluster();
   clusterColor = c.getClusterCenter();
+  
+  groupUpPixels();
+}
+
+void loadImg(String name) {
+  img = loadImage(name);
+  imgWidth = img.width;
+  imgHeight = img.height;
+  totalPixel = imgWidth * imgHeight;
+}
+
+void groupUpPixels() {
+  colorGroup = new ArrayList<ArrayList<Integer>>();
   for (int i = 0; i < k; i++) {
     ArrayList<Integer> group = new ArrayList<Integer>();
     colorGroup.add(group);
   }
   
-  for (int i = 0; i < refImg.width * refImg.height; i++) {
+  for (int i = 0; i < img.width * img.height; i++) {
     int index = nearestCluster[i];
     colorGroup.get(index).add(i);
   }
-  /*colorGroup.get(0).add(1);
-  for (int i = 0; i < 2; i++) {
-    println(colorGroup.get(i).size());
-  }*/
 }
 
-void initializeWorms(ArrayList<PVector> clusterColor, int k) {
-  int totalPixel = refImg.width * refImg.height;
-  float[] portion = new float[k];
-  int[] wormCount = new int[k];
-  
+void initializeWorms(int k) {
   worms = new ArrayList<Worm>();
   
+  // calculate the worm count for each color
+  float[] portion = new float[k];
+  int[] wormCount = new int[k];
   for (int i = 0; i < k; i++) {
     portion[i] = (float)colorGroup.get(i).size() / (float)totalPixel;
     float delta = (totalWorm * portion[i]) - (int)(totalWorm * portion[i]);
@@ -54,17 +65,38 @@ void initializeWorms(ArrayList<PVector> clusterColor, int k) {
     else
       wormCount[i] = (int)(totalWorm * portion[i]);
   }
-  
   int wormLeft = totalWorm;
   for (int i = 0; i < k; i++)
     wormLeft -= wormCount[i];
   wormCount[k - 1] += wormLeft;
   
+  // initialize each worm
+  float limitDistance = sqrt(pow(imgWidth, 2.0f) + pow(imgHeight, 2.0f)) / 10.0f;
   for (int i = 0; i < k; i++) {
+    ArrayList<Integer> chosenPos = new ArrayList<Integer>();
     for (int j = 0; j < wormCount[i]; j++) {
-      int posIndex = (int)random(0, colorGroup.get(i).size());
-      int row = posIndex / refImg.width;
-      int col = posIndex % refImg.width;
+      int posIndex;
+      
+      int loopDepth = 5;
+      while (loopDepth > 0) {
+        boolean toBreak = true;
+        
+        posIndex = (int)random(0, colorGroup.get(i).size());
+        for (int k = 0; k < chosenPos.size(); k++) {
+          int cp = chosenPos.get(k);
+          if (getDistance(cp, posIndex) < limitDistance) {
+            toBreak = false;
+            break;
+          }
+        }   
+        if (toBreak)
+          break;
+        loopDepth--;
+      }
+      chosenPos.add(posIndex);
+      
+      int row = posIndex / imgWidth;
+      int col = posIndex % imgWidth;
       PVector pos = new PVector(col, row);
       PVector v = new PVector(random(0, 1), random(0, 1));
       v.normalize();
@@ -73,4 +105,10 @@ void initializeWorms(ArrayList<PVector> clusterColor, int k) {
       worms.add(worm);
     }
   }
+}
+
+void getDistance(int p1, int p2) {
+  PVector v1 = new PVector((int)(p1 % imgWidth), (int)(p1 / imgWidth));
+  PVector v2 = new PVector((int)(p2 % imgWidth), (int)(p2 / imgWidth));
+  return PVector.dist(v1, v2);
 }

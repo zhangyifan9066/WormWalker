@@ -19,9 +19,23 @@ class Cluster {
     this.k = k;
     this.enable = true;
     
-    initializeClusterCenter();
     initializepixelColor();
+    initializeClusterCenter();
     initializeNearestCluster();
+  }
+  
+  private float calculateNearestDistance(PVector c) {
+    if (this.prevClusterCenter.size == 0)
+      return 0.0;
+      
+    float distance = calculateAberration(this.prevClusterCenter.get(0), c);
+    for (int i = 1; i < this.prevClusterCenter.size(); i++) {
+      float d = calculateAberration(this.prevClusterCenter.get(i), c);
+      if (d < distance)
+        distance = d;
+    }
+    
+    return distance;
   }
   
   private void initializeClusterCenter() {
@@ -33,6 +47,31 @@ class Cluster {
                               random(-128, 127));
       this.prevClusterCenter.add(p);
       this.clusterCenter.add(p);
+    }
+    
+    float[] d = new float[totalPixel];
+    float sum = 0.0;
+    int index = (int)random(0, totalPixel);
+    this.prevClusterCenter.add(pixelColor[index]);
+    
+    for (int i = 1; i < k; i++) {
+      sum = 0.0;
+      for (int j = 0; j < totalPixel; j++) {
+        d[j] = calculateNearestDistance(pixelColor[j]);
+        sum += d[j];
+      }
+      sum = random(0, sum);
+      for (int j = 0; j < totalPixel; j++) {
+         sum -= d[j];
+         if (sum > 0)
+           continue;
+         this.prevClusterCenter.add(pixelColor[j]);
+         break;
+      }
+    }
+    
+    for (int i = 0; i < k; i++) {
+      this.clusterCenter.add(this.prevClusterCenter.get(i));
     }
   }
   

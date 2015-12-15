@@ -20,8 +20,8 @@ void setup() {
   size(1024, 512);
   
   imgName = "lena.gif";
-  totalCluster = 10;
-  totalWorm = 30;
+  totalCluster = 5;
+  totalWorm = 60;
   
   loadImg(imgName);
   
@@ -31,13 +31,15 @@ void setup() {
   clusterColor = c.getClusterCenter();
   
   groupUpPixels();
+  
+  initializeWorms(totalCluster);
 }
 
-void draw() {
+/*void draw() {
   for (int i =  0; i < worms.size(); i++) {
     worms.get(i).crawl();
   }
-}
+}*/
 
 void loadImg(String name) {
   img = loadImage(name);
@@ -105,12 +107,17 @@ void initializeWorms(int k) {
       
       int row = posIndex / imgWidth;
       int col = posIndex % imgWidth;
-      PVector pos = new PVector(row, col  );
+      PVector pos = new PVector(row, col);
       PVector v = new PVector(random(0, 1), random(0, 1));
       v.normalize();
       v.mult(5);
       Worm worm = new Worm(clusterColor.get(i), pos, v);
       worms.add(worm);
+      
+      stroke(0, 0, 255);
+      fill(0, 0, 255);
+      
+      ellipse(512 + col, row, 3, 3);
     }
   }
 }

@@ -25,14 +25,14 @@ class Worm {
   
   private PVector seek() {
     PVector force = calculateTotalForce();
-    this.v.add(force * 1.0).normalize().mult(5.0);
+    this.v.add(force.mult(1.0)).normalize().mult(5.0);
     PVector newPos = new PVector(this.pos.x + (float)round(v.x * 1.0), this.pos.y + (float)round(v.y * 1.0));
     return newPos;
   }
   
   public void crawl() {
     PVector newPos = seek();
-    stroke(red(this.rgb), blue(this.rgb), green(this.green));
+    stroke(red(this.rgb), blue(this.rgb), green(this.rgb));
     line(this.pos.y, this.pos.x, newPos.y, newPos.x);
     
     this.pos = newPos;
@@ -57,13 +57,13 @@ class Worm {
   private PVector calculateTotalForce() {
     PVector force = new PVector(0.0, 0.0);
     
-    for (int i = this.pos.x - this.seekRadius; i <= this.pos.x + this.seekRadius; i++) {
-      for (int j = this.pos.y - this.seekRadius; j <= this.pos.y + this.seekRadius; j++) {
-        if (i >= 0; && i < imgHeight && j >= 0 && j <= imgWidth) {
+    for (int i = (int)(this.pos.x - this.seekRadius); i <= (int)(this.pos.x + this.seekRadius); i++) {
+      for (int j = (int)(this.pos.y - this.seekRadius); j <= (int)(this.pos.y + this.seekRadius); j++) {
+        if (i >= 0 && i < imgHeight && j >= 0 && j <= imgWidth) {
           int index = i * imgWidth + j;
           PVector targetPos = new PVector(i, j);
           float forceMagnitude = calculateForceMagnitude(targetPos, pixelColor[index], 1.0);
-          force.add(targetPos.sub(this.pos).normalize() * forceMagnitude);
+          force.add(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
         }
       }
     }

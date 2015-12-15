@@ -7,9 +7,11 @@ int totalPixel;
 int totalCluster;
 int totalWorm;
 
-PVector[] clusterColor;
+ArrayList<PVector> clusterColor;
 int[] nearestCluster;
 PVector[] pixelColor;
+
+float MAX_LAB_ABERRATION = PVector.dist(new PVector(0.0, -128.0, -128.0), new PVector(100.0, 127.0, 127.0));
 
 ArrayList<ArrayList<Integer>> colorGroup;
 ArrayList<Worm> worms;
@@ -31,6 +33,12 @@ void setup() {
   groupUpPixels();
 }
 
+void draw() {
+  for (int i =  0; i < worms.size(); i++) {
+    worms.get(i).crawl();
+  }
+}
+
 void loadImg(String name) {
   img = loadImage(name);
   imgWidth = img.width;
@@ -40,7 +48,7 @@ void loadImg(String name) {
 
 void groupUpPixels() {
   colorGroup = new ArrayList<ArrayList<Integer>>();
-  for (int i = 0; i < k; i++) {
+  for (int i = 0; i < totalCluster; i++) {
     ArrayList<Integer> group = new ArrayList<Integer>();
     colorGroup.add(group);
   }
@@ -75,15 +83,15 @@ void initializeWorms(int k) {
   for (int i = 0; i < k; i++) {
     ArrayList<Integer> chosenPos = new ArrayList<Integer>();
     for (int j = 0; j < wormCount[i]; j++) {
-      int posIndex;
+      int posIndex = 0;
       
       int loopDepth = 5;
       while (loopDepth > 0) {
         boolean toBreak = true;
         
-        posIndex = (int)random(0, colorGroup.get(i).size());
-        for (int k = 0; k < chosenPos.size(); k++) {
-          int cp = chosenPos.get(k);
+        posIndex = round(random(0, colorGroup.get(i).size() - 1));
+        for (int kk = 0; kk < chosenPos.size(); kk++) {
+          int cp = chosenPos.get(kk);
           if (getDistance(cp, posIndex) < limitDistance) {
             toBreak = false;
             break;
@@ -97,7 +105,7 @@ void initializeWorms(int k) {
       
       int row = posIndex / imgWidth;
       int col = posIndex % imgWidth;
-      PVector pos = new PVector(col, row);
+      PVector pos = new PVector(row, col  );
       PVector v = new PVector(random(0, 1), random(0, 1));
       v.normalize();
       v.mult(5);
@@ -107,7 +115,7 @@ void initializeWorms(int k) {
   }
 }
 
-void getDistance(int p1, int p2) {
+float getDistance(int p1, int p2) {
   PVector v1 = new PVector((int)(p1 % imgWidth), (int)(p1 / imgWidth));
   PVector v2 = new PVector((int)(p2 % imgWidth), (int)(p2 / imgWidth));
   return PVector.dist(v1, v2);

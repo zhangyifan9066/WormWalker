@@ -3,7 +3,7 @@
  * @class
  */
 class Cluster {
-  private enable;
+  private boolean enable;
   private int k;
   private ArrayList<PVector> prevClusterCenter;
   private ArrayList<PVector> clusterCenter;
@@ -52,16 +52,16 @@ class Cluster {
   /*
    * Calculate the chromatic aberration of 2 Lab color  
    */
-  private float calculateDistance(PVector c1, PVector c2) {
+  private float calculateAberration(PVector c1, PVector c2) {
     return PVector.dist(c1, c2);
   }
   
   private void findNearestCluster() {
     for (int i = 0; i < totalPixel; i++) {
-      float nearestDistance = calculateDistance(prevClusterCenter.get(0), pixelColor[i]);
+      float nearestDistance = calculateAberration(prevClusterCenter.get(0), pixelColor[i]);
       nearestCluster[i] = 0;
       for (int j = 1; j < k; j++) {
-        float distance = calculateDistance(prevClusterCenter.get(j), pixelColor[i]);
+        float distance = calculateAberration(prevClusterCenter.get(j), pixelColor[i]);
         if (distance < nearestDistance) {
           nearestDistance = distance;
           nearestCluster[i] = j;
@@ -106,7 +106,7 @@ class Cluster {
       
       boolean toStop = true; //<>//
       for (int i = 0; i < k; i++) {
-        if (calculateDistance(this.prevClusterCenter.get(i), this.clusterCenter.get(i)) > 1.0) {
+        if (calculateAberration(this.prevClusterCenter.get(i), this.clusterCenter.get(i)) > 1.0) {
           toStop = false;
           break;
         }

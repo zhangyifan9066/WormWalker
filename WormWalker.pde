@@ -55,7 +55,7 @@ void groupUpPixels() {
     colorGroup.add(group);
   }
   
-  for (int i = 0; i < img.width * img.height; i++) {
+  for (int i = 0; i < totalPixel; i++) {
     int index = nearestCluster[i];
     colorGroup.get(index).add(i);
   }
@@ -80,6 +80,10 @@ void initializeWorms(int k) {
     wormLeft -= wormCount[i];
   wormCount[k - 1] += wormLeft;
   
+  for (int i = 0; i < k; i++) {
+    println(wormCount[i]);
+  }
+  
   // initialize each worm
   float limitDistance = sqrt(pow(imgWidth, 2.0f) + pow(imgHeight, 2.0f)) / 10.0f;
   for (int i = 0; i < k; i++) {
@@ -91,7 +95,7 @@ void initializeWorms(int k) {
       while (loopDepth > 0) {
         boolean toBreak = true;
         
-        posIndex = round(random(0, colorGroup.get(i).size() - 1));
+        posIndex = (int)random(0, colorGroup.get(i).size());
         for (int kk = 0; kk < chosenPos.size(); kk++) {
           int cp = chosenPos.get(kk);
           if (getDistance(cp, posIndex) < limitDistance) {
@@ -103,10 +107,12 @@ void initializeWorms(int k) {
           break;
         loopDepth--;
       }
-      chosenPos.add(posIndex);
+      int p = colorGroup.get(i).get(posIndex)
+      chosenPos.add(p);
       
-      int row = posIndex / imgWidth;
-      int col = posIndex % imgWidth;
+      
+      int row = p / imgWidth;
+      int col = p % imgWidth;
       PVector pos = new PVector(row, col);
       PVector v = new PVector(random(0, 1), random(0, 1));
       v.normalize();
@@ -114,8 +120,9 @@ void initializeWorms(int k) {
       Worm worm = new Worm(clusterColor.get(i), pos, v);
       worms.add(worm);
       
-      stroke(0, 0, 255);
-      fill(0, 0, 255);
+      color c = Lab2RGB(clusterColor.get(i));
+      stroke(red(c), green(c), blue(c));
+      fill(red(c), green(c), blue(c));
       
       ellipse(512 + col, row, 3, 3);
     }

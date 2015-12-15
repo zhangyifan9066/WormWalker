@@ -32,7 +32,7 @@ class Worm {
   
   public void crawl() {
     PVector newPos = seek();
-    stroke(red(this.rgb), blue(this.rgb), green(this.rgb));
+    stroke(red(this.rgb), green(this.rgb), blue(this.rgb));
     line(this.pos.y, this.pos.x, newPos.y, newPos.x);
     
     this.pos = newPos;

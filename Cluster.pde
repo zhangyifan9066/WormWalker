@@ -25,7 +25,7 @@ class Cluster {
   }
   
   private float calculateNearestDistance(PVector c) {
-    if (this.prevClusterCenter.size == 0)
+    if (this.prevClusterCenter.size() == 0)
       return 0.0;
       
     float distance = calculateAberration(this.prevClusterCenter.get(0), c);
@@ -41,13 +41,13 @@ class Cluster {
   private void initializeClusterCenter() {
     this.prevClusterCenter = new ArrayList<PVector>();
     this.clusterCenter = new ArrayList<PVector>();
-    for (int i = 0; i < k; i++) {
+    /*for (int i = 0; i < k; i++) {
       PVector p = new PVector(random(0, 100),
                               random(-128, 127),
                               random(-128, 127));
       this.prevClusterCenter.add(p);
       this.clusterCenter.add(p);
-    }
+    }*/
     
     float[] d = new float[totalPixel];
     float sum = 0.0;

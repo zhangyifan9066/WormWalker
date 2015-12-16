@@ -17,7 +17,7 @@ class Worm {
     this.c = c;
     this.pos = pos;
     this. v = v;
-    this.strokeWeight = 1.0f;
+    this.strokeWeight = 3.0f;
     this.strokeOpacity = 128.0;
     this.seekRadius = 2;
     this.G = 10.0;
@@ -36,8 +36,34 @@ class Worm {
     PVector newPos = seek();
     //println(newPos);
     
-    //float aberration = calculateAberration(pixelColor[newPox.x * imgWidth + newPos.y];
+    if (newPos.x >= 0 && newPos.x < imgHeight && newPos.y >= 0 && newPos.y < imgWidth) {
+      float aberration = calculateAberration(pixelColor[(int)(this.pos.x * imgWidth + this.pos.y)], this.c);
+      float newAberration = calculateAberration(pixelColor[(int)(newPos.x * imgWidth + newPos.y)], this.c);
+      
+      float factor = (aberration - newAberration) / aberration;
+      //factor = factor < 0 ? 0 : factor;
+      float limit = ((1 - newAberration / MAX_LAB_ABERRATION) - 0.80) / 0.3;
+      limit = limit < 0 ? 0 : limit;
+      
+      float limitWeight = (0.25 + 2.75 * limit);
+      float limitOpacity = (5 + 250 * limit);
+      if (factor >= 0) {
+        this.strokeWeight = this.strokeWeight > limitWeight ? limitWeight : this.strokeWeight;
+        this.strokeOpacity = this.strokeOpacity > limitOpacity ? limitOpacity : this.strokeOpacity;
+      } else {
+        this.strokeWeight = this.strokeWeight < limitWeight ? limitWeight : this.strokeWeight;
+        this.strokeOpacity = this.strokeOpacity < limitOpacity ? limitOpacity : this.strokeOpacity;
+      }
+      this.strokeWeight *= (1 + factor);
+      this.strokeOpacity *= (1 + factor);
+      
+      this.strokeWeight = this.strokeWeight > 3 ? 3 : this.strokeWeight;
+      this.strokeOpacity = this.strokeOpacity > 255 ? 255 : this.strokeOpacity;
+      this.strokeWeight = this.strokeWeight < 0.25 ? 0.25 : this.strokeWeight;
+      this.strokeOpacity = this.strokeOpacity < 5 ? 5 : this.strokeOpacity;
+    }
     
+    strokeWeight(this.strokeWeight);
     stroke(red(this.rgb), green(this.rgb), blue(this.rgb), this.strokeOpacity);
     line(this.pos.y, this.pos.x, newPos.y, newPos.x);
     

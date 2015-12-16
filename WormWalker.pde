@@ -25,7 +25,7 @@ void setup() {
   
   loadImg(imgName);
   
-  Cluster c = new Cluster(totalCluster); //<>//
+  Cluster c = new Cluster(totalCluster);
   c.act();
   c.rendering();
   clusterColor = c.getClusterCenter();
@@ -33,13 +33,19 @@ void setup() {
   groupUpPixels();
   
   initializeWorms(totalCluster);
+  
+  /*for (int j = 0; j < 5; j++) {
+    for (int i =  0; i < worms.size(); i++) {
+      worms.get(i).crawl();
+    }
+  }*/
 }
 
-/*void draw() {
+void draw() {
   for (int i =  0; i < worms.size(); i++) {
     worms.get(i).crawl();
   }
-}*/
+}
 
 void loadImg(String name) {
   img = loadImage(name);
@@ -80,10 +86,6 @@ void initializeWorms(int k) {
     wormLeft -= wormCount[i];
   wormCount[k - 1] += wormLeft;
   
-  for (int i = 0; i < k; i++) {
-    println(wormCount[i]);
-  }
-  
   // initialize each worm
   float limitDistance = sqrt(pow(imgWidth, 2.0f) + pow(imgHeight, 2.0f)) / 10.0f;
   for (int i = 0; i < k; i++) {
@@ -107,9 +109,8 @@ void initializeWorms(int k) {
           break;
         loopDepth--;
       }
-      int p = colorGroup.get(i).get(posIndex)
+      int p = colorGroup.get(i).get(posIndex);
       chosenPos.add(p);
-      
       
       int row = p / imgWidth;
       int col = p % imgWidth;
@@ -120,9 +121,11 @@ void initializeWorms(int k) {
       Worm worm = new Worm(clusterColor.get(i), pos, v);
       worms.add(worm);
       
-      color c = Lab2RGB(clusterColor.get(i));
-      stroke(red(c), green(c), blue(c));
-      fill(red(c), green(c), blue(c));
+      //color c = Lab2RGB(clusterColor.get(i));
+      //stroke(red(c), green(c), blue(c));
+      //fill(red(c), green(c), blue(c));
+      stroke(0,255,0);
+      fill(0,255,0);
       
       ellipse(512 + col, row, 3, 3);
     }

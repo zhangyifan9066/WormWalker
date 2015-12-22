@@ -27,7 +27,7 @@ class Worm {
   
   private PVector seek() {
     PVector force = calculateTotalForce();
-    this.v.add(force.mult(1.0)).normalize().mult(3.0);
+    this.v.add(force.mult(1.0)).normalize().mult(random(2.5, 3.5));
     PVector newPos = new PVector(this.pos.x + (float)round(v.x * 1.0), this.pos.y + (float)round(v.y * 1.0));
     return newPos;
   }
@@ -46,7 +46,7 @@ class Worm {
       limit = limit < 0 ? 0 : limit;
       
       float limitWeight = (0.25 + 2.75 * limit);
-      float limitOpacity = (5 + 250 * limit);
+      float limitOpacity = (20 + 235 * limit);
       if (factor >= 0) {
         this.strokeWeight = this.strokeWeight > limitWeight ? limitWeight : this.strokeWeight;
         this.strokeOpacity = this.strokeOpacity > limitOpacity ? limitOpacity : this.strokeOpacity;
@@ -60,7 +60,7 @@ class Worm {
       this.strokeWeight = this.strokeWeight > 3 ? 3 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity > 255 ? 255 : this.strokeOpacity;
       this.strokeWeight = this.strokeWeight < 0.25 ? 0.25 : this.strokeWeight;
-      this.strokeOpacity = this.strokeOpacity < 5 ? 5 : this.strokeOpacity;
+      this.strokeOpacity = this.strokeOpacity < 20 ? 20 : this.strokeOpacity;
     }
     
     strokeWeight(this.strokeWeight);
@@ -115,6 +115,7 @@ class Worm {
    */
   private float calculateAberration(PVector c1, PVector c2) {
     return PVector.dist(c1, c2);
+    //return PVector.dist(new PVector(c1.y, c1.z), new PVector(c2.y, c2.z));
   }
   
   /*

@@ -14,23 +14,25 @@ PVector[] pixelColor;
 float MAX_LAB_ABERRATION = PVector.dist(new PVector(0.0, -128.0, -128.0), new PVector(100.0, 127.0, 127.0));
 
 ArrayList<ArrayList<Integer>> colorGroup;
+ArrayList<ArrayList<Cluster>> positionGroup;
 ArrayList<Worm> worms;
 
 void setup() {
   size(1024, 512);
   
   imgName = "lena.gif";
-  totalCluster = 5;
+  totalCluster = 15 ;
   totalWorm = 60;
   
   loadImg(imgName);
   
-  Cluster c = new Cluster(totalCluster);
-  c.act();
-  c.rendering();
-  clusterColor = c.getClusterCenter();
+  Kmeans kmeans = new Kmeans(totalCluster);
+  kmeans.act();
+  kmeans.rendering();
+  clusterColor = kmeans.getClusterCenter();
   
   groupUpPixels();
+  getPositionClusters();
   
   initializeWorms(totalCluster);
   
@@ -52,6 +54,7 @@ void loadImg(String name) {
   imgWidth = img.width;
   imgHeight = img.height;
   totalPixel = imgWidth * imgHeight;
+  //image(img, 0, 0);
 }
 
 void groupUpPixels() {
@@ -64,6 +67,34 @@ void groupUpPixels() {
   for (int i = 0; i < totalPixel; i++) {
     int index = nearestCluster[i];
     colorGroup.get(index).add(i);
+  }
+}
+
+void getPositionClusters() {
+  positionGroup = new ArrayList<ArrayList<Cluster>>();
+  
+  println(colorGroup.get(0).size());
+  for (int i = 0; i < 1; i++) {
+    Meanshift ms = new Meanshift(colorGroup.get(i), 20);
+    positionGroup.add(ms.act());
+  }
+  
+  ArrayList<Cluster> ac = positionGroup.get(0);
+  img.loadPixels();
+  for (int i = 0; i < ac.size(); i++) {
+    color c = color(random(0, 255), random(0, 255), random(0, 255));
+    ArrayList<Integer> points = ac.get(i).points;
+    for (int j = 0; j < points.size(); j++) {
+      img.pixels[points.get(j)] = c;
+    }
+  }
+  
+  img.updatePixels();
+  image(img, 512, 0);
+  for (int i = 0; i < ac.size(); i++) {
+    fill(255, 0, 0);
+    //println(ac.get(i).getCenter());
+    ellipse(512 + ac.get(i).getCenter().y, ac.get(i).getCenter().x, 5, 5);
   }
 }
 

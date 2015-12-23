@@ -14,9 +14,9 @@ class Worm {
   float G;
   
   public Worm(PVector c, PVector pos, PVector v) {
-    this.c = c;
+    this.c = new PVector(c.x, c.y, c.z);
     this.pos = pos;
-    this. v = v;
+    this.v = v;
     this.strokeWeight = 3.0f;
     this.strokeOpacity = 128.0;
     this.seekRadius = 2;
@@ -34,18 +34,33 @@ class Worm {
   
   public void crawl() {
     PVector newPos = seek();
-    //println(newPos);
     
     if (newPos.x >= 0 && newPos.x < imgHeight && newPos.y >= 0 && newPos.y < imgWidth) {
       float aberration = calculateAberration(pixelColor[(int)(this.pos.x * imgWidth + this.pos.y)], this.c);
       float newAberration = calculateAberration(pixelColor[(int)(newPos.x * imgWidth + newPos.y)], this.c);
+      
+      /*int minIndex = 0;
+      float minAberration = calculateAberration(pixelColor[(int)(newPos.x * imgWidth + newPos.y)], clusterColor.get(0));
+      for (int i = 1; i < totalCluster; i++) {
+        float newColorAberration = calculateAberration(pixelColor[(int)(newPos.x * imgWidth + newPos.y)], clusterColor.get(i));
+        if (newColorAberration < minAberration) {
+          minIndex = i;
+          minAberration = newColorAberration;
+        }
+      }
+      if (abs(minAberration - newAberration) > 0.0001)
+        changeColor(clusterColor.get(minIndex));*/
+        
+      int newColorIndex = nearestCluster[(int)(newPos.x * imgWidth + newPos.y)];
+      PVector newColor = clusterColor.get(newColorIndex);
+      changeColor(newColor);
       
       float factor = (aberration - newAberration) / aberration;
       //factor = factor < 0 ? 0 : factor;
       float limit = ((1 - newAberration / MAX_LAB_ABERRATION) - 0.80) / 0.3;
       limit = limit < 0 ? 0 : limit;
       
-      float limitWeight = (0.25 + 2.75 * limit);
+      float limitWeight = (1 + 2 * limit);
       float limitOpacity = (20 + 235 * limit);
       if (factor >= 0) {
         this.strokeWeight = this.strokeWeight > limitWeight ? limitWeight : this.strokeWeight;
@@ -59,7 +74,7 @@ class Worm {
       
       this.strokeWeight = this.strokeWeight > 3 ? 3 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity > 255 ? 255 : this.strokeOpacity;
-      this.strokeWeight = this.strokeWeight < 0.25 ? 0.25 : this.strokeWeight;
+      this.strokeWeight = this.strokeWeight < 1 ? 1 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity < 20 ? 20 : this.strokeOpacity;
     }
     
@@ -123,5 +138,13 @@ class Worm {
    */
   private float calculateDistance(PVector p1, PVector p2) {
     return PVector.dist(p1, p2);
+  }
+  
+  private void changeColor(PVector c) {
+    this.c.x = c.x;
+    this.c.y = c.y;
+    this.c.z = c.z;
+    
+    this.rgb = Lab2RGB(this.c);
   }
 }

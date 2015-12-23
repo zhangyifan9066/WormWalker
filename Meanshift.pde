@@ -49,11 +49,11 @@ class Meanshift {
     PVector mVector = calculateMVector(startPointIndex, c);
     while (mVector.mag() > 1.0) {
       //print("haha");
-      //println(mVector);
       c.updateCenter(mVector);
       mVector = calculateMVector(c.getCenterIndex(), c);
+      println(mVector);
     }
-    //println("ee");
+    println("ee");
     return c;
   }
   
@@ -67,6 +67,23 @@ class Meanshift {
         for (int k = j + 1; k < clusters.size();) {
           Cluster c1 = clusters.get(j);
           Cluster c2 = clusters.get(k);
+          
+          /*int count = 0;
+          for (int ii = 0; ii < c1.points.size(); ii++) {
+            for (int jj = ii; jj < c2.points.size(); jj++) {
+              if (c1.points.get(ii) == c2.points.get(jj)) {
+                count++;
+              }
+            }
+          }
+          
+          if ((float)count / c1.points.size() > 0.01 || (float)count / c2.points.size() > 0.01) {
+            c1.merge(c2);
+            clusters.remove(k);
+          } else {
+            k++;
+          }*/
+          
           if (calculateDistance(c1.getCenter(), c2.getCenter()) < 50) {
             c1.merge(c2);
             clusters.remove(k);
@@ -89,7 +106,7 @@ class Meanshift {
         /*boolean merged = false;
         for (int i = 0; i < clusters.size(); i++) {
           Cluster existedCluster = clusters.get(i);
-          if (calculateDistance(c.getCenter(), existedCluster.getCenter()) <= 50) {
+          if (calculateDistance(c.getCenter(), existedCluster.getCenter()) <= 100) {
             //println("lalala");
             existedCluster.merge(c);
             merged = true;

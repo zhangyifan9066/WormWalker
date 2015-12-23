@@ -19,27 +19,28 @@ ArrayList<Worm> worms;
 
 void setup() {
   size(1024, 512);
-  
+  strokeJoin(ROUND);
+
   imgName = "lena.gif";
-  totalCluster = 15 ;
-  totalWorm = 60;
-  
+  totalCluster = 15;
+  totalWorm = 200;
+
   loadImg(imgName);
-  
+
   Kmeans kmeans = new Kmeans(totalCluster);
   kmeans.act();
   kmeans.rendering();
   clusterColor = kmeans.getClusterCenter();
-  
+
   groupUpPixels();
-  getPositionClusters();
-  
+  //getPositionClusters();
+
   initializeWorms(totalCluster);
-  
+
   /*for (int j = 0; j < 5; j++) {
-    for (int i =  0; i < worms.size(); i++) {
-      worms.get(i).crawl();
-    }
+   for (int i =  0; i < worms.size(); i++) {
+   worms.get(i).crawl();
+   }
   }*/
 }
 
@@ -63,7 +64,7 @@ void groupUpPixels() {
     ArrayList<Integer> group = new ArrayList<Integer>();
     colorGroup.add(group);
   }
-  
+
   for (int i = 0; i < totalPixel; i++) {
     int index = nearestCluster[i];
     colorGroup.get(index).add(i);
@@ -72,13 +73,13 @@ void groupUpPixels() {
 
 void getPositionClusters() {
   positionGroup = new ArrayList<ArrayList<Cluster>>();
-  
+
   println(colorGroup.get(0).size());
   for (int i = 0; i < 1; i++) {
     Meanshift ms = new Meanshift(colorGroup.get(i), 20);
     positionGroup.add(ms.act());
   }
-  
+
   ArrayList<Cluster> ac = positionGroup.get(0);
   img.loadPixels();
   for (int i = 0; i < ac.size(); i++) {
@@ -88,7 +89,7 @@ void getPositionClusters() {
       img.pixels[points.get(j)] = c;
     }
   }
-  
+
   img.updatePixels();
   image(img, 512, 0);
   for (int i = 0; i < ac.size(); i++) {
@@ -100,7 +101,7 @@ void getPositionClusters() {
 
 void initializeWorms(int k) {
   worms = new ArrayList<Worm>();
-  
+
   // calculate the worm count for each color
   float[] portion = new float[k];
   int[] wormCount = new int[k];
@@ -116,18 +117,18 @@ void initializeWorms(int k) {
   for (int i = 0; i < k; i++)
     wormLeft -= wormCount[i];
   wormCount[k - 1] += wormLeft;
-  
+
   // initialize each worm
   float limitDistance = sqrt(pow(imgWidth, 2.0f) + pow(imgHeight, 2.0f)) / 10.0f;
   for (int i = 0; i < k; i++) {
     ArrayList<Integer> chosenPos = new ArrayList<Integer>();
     for (int j = 0; j < wormCount[i]; j++) {
       int posIndex = 0;
-      
+
       int loopDepth = 5;
       while (loopDepth > 0) {
         boolean toBreak = true;
-        
+
         posIndex = (int)random(0, colorGroup.get(i).size());
         for (int kk = 0; kk < chosenPos.size(); kk++) {
           int cp = chosenPos.get(kk);
@@ -142,7 +143,7 @@ void initializeWorms(int k) {
       }
       int p = colorGroup.get(i).get(posIndex);
       chosenPos.add(p);
-      
+
       int row = p / imgWidth;
       int col = p % imgWidth;
       PVector pos = new PVector(row, col);
@@ -151,13 +152,10 @@ void initializeWorms(int k) {
       v.mult(5);
       Worm worm = new Worm(clusterColor.get(i), pos, v);
       worms.add(worm);
-      
-      //color c = Lab2RGB(clusterColor.get(i));
-      //stroke(red(c), green(c), blue(c));
-      //fill(red(c), green(c), blue(c));
-      stroke(0,255,0);
-      fill(0,255,0);
-      
+
+      stroke(0, 255, 0);
+      fill(0, 255, 0);
+
       ellipse(512 + col, row, 3, 3);
     }
   }

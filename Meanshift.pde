@@ -86,7 +86,6 @@ class Meanshift {
           
           //if ((float)count / c1.points.size() > 0.01 || (float)count / c2.points.size() > 0.01) {
           if (count > 0) {
-            println("haha");
             c1.merge(c2);
             clusters.remove(k);
           } else {

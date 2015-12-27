@@ -6,10 +6,12 @@ class Worm {
   PVector c;
   color rgb;
   PVector pos;
+  PVector prevPos;
   PVector v;
   float strokeWeight;
   float strokeOpacity;
   int seekRadius;
+  int edgeCount;
   
   ArrayList<Cluster> clusters;
   ArrayList<Integer> pointIndexes;
@@ -18,13 +20,15 @@ class Worm {
   
   public Worm(PVector c, PVector pos, PVector v, ArrayList<Cluster> clusters, ArrayList<Integer> pointIndexes) {
     this.c = new PVector(c.x, c.y, c.z);
-    this.pos = pos;
+    this.pos = new PVector(pos.x, pos.y);
+    this.prevPos = new PVector(pos.x, pos.y);
     this.v = v;
     this.clusters = clusters;
     this.pointIndexes = pointIndexes;
     this.strokeWeight = 3.0f;
     this.strokeOpacity = 128.0;
-    this.seekRadius = 8;
+    this.seekRadius = 10;
+    this.edgeCount = 0;
     this.G = 10.0;
     
     this.rgb = Lab2RGB(this.c);
@@ -42,6 +46,29 @@ class Worm {
     PVector newPos = seek();
     
     if (newPos.x >= 0 && newPos.x < imgHeight && newPos.y >= 0 && newPos.y < imgWidth) {
+      PVector prevDir = PVector.sub(this.pos, this.prevPos);
+      PVector newDir = PVector.sub(newPos, this.pos);
+      float angleBetween = degrees(PVector.angleBetween(prevDir, newDir));
+      if (angleBetween > 100) {
+        if (this.edgeCount < 1) {
+          this.edgeCount++;
+        } else {
+          println("ch");
+          //this.seekRadius = 7;
+          this.edgeCount = 0;
+          newPos = PVector.add(this.pos, prevDir);
+          
+          if (newPos.x >= 0 && newPos.x < imgHeight && newPos.y >= 0 && newPos.y < imgWidth) {
+            int newColorIndex = nearestCluster[(int)(newPos.x * imgWidth + newPos.y)];
+            PVector newColor = clusterColor.get(newColorIndex);
+            changeColor(newColor);
+          }
+          
+          newPos = seek();
+        }
+      }
+      
+      if (newPos.x >= 0 && newPos.x < imgHeight && newPos.y >= 0 && newPos.y < imgWidth) {
       float aberration = calculateAberration(pixelColor[(int)(this.pos.x * imgWidth + this.pos.y)], this.c);
       float newAberration = calculateAberration(pixelColor[(int)(newPos.x * imgWidth + newPos.y)], this.c);
       
@@ -54,8 +81,11 @@ class Worm {
           minAberration = newColorAberration;
         }
       }
-      if (abs(minAberration - newAberration) > 0.0001)
-        changeColor(clusterColor.get(minIndex));*/
+      if (abs(minAberration - newAberration) > 0.0001 && this.seekRadius == 7) {
+        println("changed"); 
+        changeColor(clusterColor.get(minIndex));
+        this.seekRadius = 8;
+      }*/
         
       /*int newColorIndex = nearestCluster[(int)(newPos.x * imgWidth + newPos.y)];
       PVector newColor = clusterColor.get(newColorIndex);
@@ -83,7 +113,7 @@ class Worm {
       this.strokeWeight = this.strokeWeight < 0.25 ? 0.25 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity < 20 ? 20 : this.strokeOpacity;
       
-      int newPosIndex = (int)newPos.x * imgWidth + (int)newPos.y;
+      /*int newPosIndex = (int)newPos.x * imgWidth + (int)newPos.y;
       if (this.pointIndexes.contains(newPosIndex)) {
         if (visitedDepth[newPosIndex] == 0) {
           for (int i = 0; i < this.clusters.size(); i++) {
@@ -92,18 +122,23 @@ class Worm {
               c.removePoint(newPosIndex);
             }
           }
+          this.pointIndexes.remove(new Integer(newPosIndex));
         }
         visitedDepth[newPosIndex]++;
-      }
+      }*/
+      }  
     }
     
     strokeWeight(this.strokeWeight);
     stroke(red(this.rgb), green(this.rgb), blue(this.rgb), this.strokeOpacity);
     line(this.pos.y, this.pos.x, newPos.y, newPos.x);
     
+    this.prevPos = this.pos;
     this.pos = newPos;
     if (newPos.x < 0 || newPos.x >= imgHeight || newPos.y < 0 || newPos.y >= imgWidth) {
       this.pos = new PVector((int)random(0, imgHeight), (int)(random(0, imgWidth)));
+      this.prevPos = new PVector(this.pos.x, this.pos.y);
+      this.edgeCount = 0;
     }
   }
   
@@ -156,13 +191,15 @@ class Worm {
       }
     }
     
-    for (int i = 0; i < this.clusters.size(); i++) {
+    /*for (int i = 0; i < this.clusters.size(); i++) {
       Cluster cluster = this.clusters.get(i);
       PVector targetPos = new PVector(cluster.getCenter().x, cluster.getCenter().y);
-      float forceMagnitude = calculateForceMagnitude1(targetPos, this.c, (float)cluster.points.size());
+      float forceMagnitude = calculateForceMagnitude1(targetPos, this.c, (float)cluster.points.size()) * 50 * cluster.points.size() / (float)this.pointIndexes.size();
+      PVector tmp = PVector.sub(targetPos, this.pos);
+      tmp.normalize().mult(forceMagnitude);
+      //println(tmp);
       force.add(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
-      println(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
-    }
+    }*/
     
     //println(force);
     return force;

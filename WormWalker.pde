@@ -21,7 +21,7 @@ ArrayList<Worm> worms;
 void setup() {
   size(1024, 512);
   strokeJoin(ROUND);
-  randomSeed(1);
+  randomSeed(3);
 
   imgName = "lena.gif";
   totalCluster = 15;

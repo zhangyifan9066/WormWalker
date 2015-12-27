@@ -10,6 +10,7 @@ int totalWorm;
 ArrayList<PVector> clusterColor;
 int[] nearestCluster;
 PVector[] pixelColor;
+int[] visitedDepth;
 
 float MAX_LAB_ABERRATION = PVector.dist(new PVector(0.0, -128.0, -128.0), new PVector(100.0, 127.0, 127.0));
 
@@ -20,12 +21,18 @@ ArrayList<Worm> worms;
 void setup() {
   size(1024, 512);
   strokeJoin(ROUND);
+  randomSeed(1);
 
   imgName = "lena.gif";
   totalCluster = 15;
   totalWorm = 200;
 
   loadImg(imgName);
+  
+  visitedDepth = new int[totalPixel];
+  for (int i = 0; i < totalPixel; i++) {
+    visitedDepth[i] = 0;
+  }
 
   Kmeans kmeans = new Kmeans(totalCluster);
   kmeans.act();
@@ -33,7 +40,7 @@ void setup() {
   clusterColor = kmeans.getClusterCenter();
 
   groupUpPixels();
-  //getPositionClusters();
+  getPositionClusters();
 
   initializeWorms(totalCluster);
 
@@ -74,13 +81,13 @@ void groupUpPixels() {
 void getPositionClusters() {
   positionGroup = new ArrayList<ArrayList<Cluster>>();
 
-  println(colorGroup.get(0).size());
-  for (int i = 0; i < 1; i++) {
-    Meanshift ms = new Meanshift(colorGroup.get(i), 20);
-    positionGroup.add(ms.act());
+  //println(colorGroup.get(0).size());
+  for (int i = 0; i < totalCluster; i++) {
+    Meanshift ms = new Meanshift(colorGroup.get(i), 10);
+    positionGroup.add(ms.act()); //<>//
   }
 
-  ArrayList<Cluster> ac = positionGroup.get(0);
+  /*ArrayList<Cluster> ac = positionGroup.get(0);
   img.loadPixels();
   for (int i = 0; i < ac.size(); i++) {
     color c = color(random(0, 255), random(0, 255), random(0, 255));
@@ -96,7 +103,7 @@ void getPositionClusters() {
     fill(255, 0, 0);
     //println(ac.get(i).getCenter());
     ellipse(512 + ac.get(i).getCenter().y, ac.get(i).getCenter().x, 5, 5);
-  }
+  }*/
 }
 
 void initializeWorms(int k) {
@@ -150,7 +157,7 @@ void initializeWorms(int k) {
       PVector v = new PVector(random(0, 1), random(0, 1));
       v.normalize();
       v.mult(5);
-      Worm worm = new Worm(clusterColor.get(i), pos, v);
+      Worm worm = new Worm(clusterColor.get(i), pos, v, positionGroup.get(i), colorGroup.get(i));
       worms.add(worm);
 
       stroke(0, 255, 0);

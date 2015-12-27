@@ -18,7 +18,7 @@ class Cluster {
   
   public void updateCenter(PVector mVector) {
     //println(this.center);
-    this.center.add(mVector);
+    this.center.add(new PVector(round(mVector.x), round(mVector.y)));
   }
   
   public PVector getCenter() {
@@ -34,6 +34,22 @@ class Cluster {
     for (int i = 0; i < c.points.size(); i++) {
       if (!this.points.contains(c.points.get(i)))
         this.points.add(c.points.get(i));
+    }
+  }
+  
+  public void removePoint(int pointIndex) {
+    if (this.points.contains(pointIndex)) {
+      PVector point = new PVector(pointIndex / imgWidth, pointIndex % imgWidth);
+      this.points.remove(new Integer(pointIndex));
+      
+      int size = this.points.size();
+      if (size == 0)
+        return;
+      
+      float x = ((float)(size + 1) * this.center.x - point.x) / (float)size;
+      float y = ((float)(size + 1) * this.center.y - point.y) / (float)size;
+      
+      updateCenter(new PVector(x, y));
     }
   }
 }

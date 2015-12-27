@@ -11,15 +11,20 @@ class Worm {
   float strokeOpacity;
   int seekRadius;
   
+  ArrayList<Cluster> clusters;
+  ArrayList<Integer> pointIndexes;
+  
   float G;
   
-  public Worm(PVector c, PVector pos, PVector v) {
+  public Worm(PVector c, PVector pos, PVector v, ArrayList<Cluster> clusters, ArrayList<Integer> pointIndexes) {
     this.c = new PVector(c.x, c.y, c.z);
     this.pos = pos;
     this.v = v;
+    this.clusters = clusters;
+    this.pointIndexes = pointIndexes;
     this.strokeWeight = 3.0f;
     this.strokeOpacity = 128.0;
-    this.seekRadius = 2;
+    this.seekRadius = 8;
     this.G = 10.0;
     
     this.rgb = Lab2RGB(this.c);
@@ -29,6 +34,7 @@ class Worm {
     PVector force = calculateTotalForce();
     this.v.add(force.mult(1.0)).normalize().mult(random(2.5, 3.5));
     PVector newPos = new PVector(this.pos.x + (float)round(v.x * 1.0), this.pos.y + (float)round(v.y * 1.0));
+    
     return newPos;
   }
   
@@ -51,16 +57,16 @@ class Worm {
       if (abs(minAberration - newAberration) > 0.0001)
         changeColor(clusterColor.get(minIndex));*/
         
-      int newColorIndex = nearestCluster[(int)(newPos.x * imgWidth + newPos.y)];
+      /*int newColorIndex = nearestCluster[(int)(newPos.x * imgWidth + newPos.y)];
       PVector newColor = clusterColor.get(newColorIndex);
-      changeColor(newColor);
+      changeColor(newColor);*/
       
       float factor = (aberration - newAberration) / aberration;
       //factor = factor < 0 ? 0 : factor;
       float limit = ((1 - newAberration / MAX_LAB_ABERRATION) - 0.80) / 0.3;
       limit = limit < 0 ? 0 : limit;
       
-      float limitWeight = (1 + 2 * limit);
+      float limitWeight = (0.25 + 2.75 * limit);
       float limitOpacity = (20 + 235 * limit);
       if (factor >= 0) {
         this.strokeWeight = this.strokeWeight > limitWeight ? limitWeight : this.strokeWeight;
@@ -74,8 +80,21 @@ class Worm {
       
       this.strokeWeight = this.strokeWeight > 3 ? 3 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity > 255 ? 255 : this.strokeOpacity;
-      this.strokeWeight = this.strokeWeight < 1 ? 1 : this.strokeWeight;
+      this.strokeWeight = this.strokeWeight < 0.25 ? 0.25 : this.strokeWeight;
       this.strokeOpacity = this.strokeOpacity < 20 ? 20 : this.strokeOpacity;
+      
+      int newPosIndex = (int)newPos.x * imgWidth + (int)newPos.y;
+      if (this.pointIndexes.contains(newPosIndex)) {
+        if (visitedDepth[newPosIndex] == 0) {
+          for (int i = 0; i < this.clusters.size(); i++) {
+            Cluster c = this.clusters.get(i);
+            if (c.points.contains(newPosIndex)) {
+              c.removePoint(newPosIndex);
+            }
+          }
+        }
+        visitedDepth[newPosIndex]++;
+      }
     }
     
     strokeWeight(this.strokeWeight);
@@ -105,6 +124,22 @@ class Worm {
   }
   
   /*
+   * Calculate the magnitude of the force from the target point
+   */
+  private float calculateForceMagnitude1(PVector targetPos, PVector targetColor, float weight) {
+    float distance = calculateDistance(targetPos, this.pos);
+    float aberration = calculateAberration(targetColor, this.c);
+    float force = 0.0; 
+    
+    if (distance > 0.00000001)
+      force = this.G * pow((1 - aberration / MAX_LAB_ABERRATION) / distance, 2.0) * weight;
+    //println(pow((1 - aberration / MAX_LAB_ABERRATION), 2.0));
+    //println(this.pos);
+    //println(force);
+    return force;
+  }
+  
+  /*
    * Calculate the total force within the seeking range;
    */
   private PVector calculateTotalForce() {
@@ -119,6 +154,14 @@ class Worm {
           force.add(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
         }
       }
+    }
+    
+    for (int i = 0; i < this.clusters.size(); i++) {
+      Cluster cluster = this.clusters.get(i);
+      PVector targetPos = new PVector(cluster.getCenter().x, cluster.getCenter().y);
+      float forceMagnitude = calculateForceMagnitude1(targetPos, this.c, (float)cluster.points.size());
+      force.add(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
+      println(targetPos.sub(this.pos).normalize().mult(forceMagnitude));
     }
     
     //println(force);

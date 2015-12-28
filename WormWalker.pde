@@ -23,9 +23,9 @@ void setup() {
   strokeJoin(ROUND);
   randomSeed(3);
 
-  imgName = "lena.gif";
-  totalCluster = 15;
-  totalWorm = 200;
+  imgName = "vt1.png";
+  totalCluster= 50;
+  totalWorm = 600;
 
   loadImg(imgName);
   

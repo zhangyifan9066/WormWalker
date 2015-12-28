@@ -106,7 +106,7 @@ class Meanshift {
   public ArrayList<Cluster> act() {
     ArrayList<Cluster> clusters = new ArrayList<Cluster>(); //<>//
     
-    int count = 0;
+    /*int count = 0;
     for (Map.Entry ele : this.points.entrySet()) {
       if (count < 2) {
       if (!(boolean)ele.getValue()) {
@@ -125,7 +125,7 @@ class Meanshift {
       } else {
         i++;
       }
-    }
+    }*/
     
     return clusters;
   }

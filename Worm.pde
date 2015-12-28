@@ -44,7 +44,7 @@ class Worm {
   private PVector seek() {
     PVector force = calculateTotalForce();
     this.v.add(force.mult(1.0)).normalize().mult(this.step);
-    PVector newPos = new PVector(this.pos.x + (float)round(v.x * 1.0), this.pos.y + (float)round(v.y * 1.0));
+    PVector newPos = new PVector((float)round(this.pos.x + (float)round(v.x * 1.0)), (float)round(this.pos.y + (float)round(v.y * 1.0)));
 
     return newPos;
   }
@@ -97,7 +97,7 @@ class Worm {
         this.step = this.seekRadius / 2.7;
       }*/
 
-      if (angleBetween > 140 && PVector.dist(aColor, this.c) > 0.00001) {
+      if (angleBetween > 120 && PVector.dist(aColor, this.c) > 0.00001) {
         if (this.edgeCount < 2) {
           this.edgeCount++;
         } else {
@@ -118,6 +118,27 @@ class Worm {
             if (PVector.dist(this.c, newColor) > 0.00001) {
               PVector delta = prevDir.normalize().mult(random(2.5, 3.5)).rotate(random(-HALF_PI, HALF_PI));
               PVector tmp = new PVector((int)(this.pos.x + delta.x), (int)(this.pos.y + delta.y));
+              
+              int newPosIndex = (int)(tmp.x * imgWidth) + (int)tmp.y;
+              if (visitedDepth[newPosIndex] < MAX_VISITED_DEPTH) {
+                PVector newPosColor = clusterColor.get(nearestCluster[newPosIndex]);
+                if (PVector.dist(this.c, newPosColor) < 0.00001) {
+                  visitedDepth[newPosIndex]++;
+                }
+              } else {
+                if (this.pointIndexes.contains(newPosIndex)) {
+                  this.pointIndexes.remove(new Integer(newPosIndex));
+                }
+                
+                if (this.pointIndexes.size() == 0)
+                  return;
+                
+                newPosIndex = this.pointIndexes.get((int)random(0, this.pointIndexes.size()));
+                this.pos = new PVector(newPosIndex / imgWidth, newPosIndex % imgWidth);
+                this.prevPos = new PVector(this.pos.x, this.pos.y);
+                return;
+              }
+              
               this.v.add(delta);
               strokeWeight(1);
               this.strokeOpacity = 128;
@@ -140,6 +161,26 @@ class Worm {
 
           //newPos = seek();
         }
+      }
+      
+      int newPosIndex = (int)(newPos.x * imgWidth) + (int)newPos.y;
+      if (visitedDepth[newPosIndex] < MAX_VISITED_DEPTH) {
+        PVector newPosColor = clusterColor.get(nearestCluster[newPosIndex]);
+        if (PVector.dist(this.c, newPosColor) < 0.00001) {
+          visitedDepth[newPosIndex]++;
+        }
+      } else {
+        if (this.pointIndexes.contains(newPosIndex)) {
+          this.pointIndexes.remove(new Integer(newPosIndex));
+        }
+        
+        if (this.pointIndexes.size() == 0)
+          return;
+        
+        newPosIndex = this.pointIndexes.get((int)random(0, this.pointIndexes.size()));
+        this.pos = new PVector(newPosIndex / imgWidth, newPosIndex % imgWidth);
+        this.prevPos = new PVector(this.pos.x, this.pos.y);
+        return;
       }
 
       newPos.x = (float)round(newPos.x);

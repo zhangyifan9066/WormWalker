@@ -13,6 +13,7 @@ PVector[] pixelColor;
 int[] visitedDepth;
 
 float MAX_LAB_ABERRATION = PVector.dist(new PVector(0.0, -128.0, -128.0), new PVector(100.0, 127.0, 127.0));
+int MAX_VISITED_DEPTH = 3;
 
 ArrayList<ArrayList<Integer>> colorGroup;
 ArrayList<ArrayList<Cluster>> positionGroup;
@@ -23,8 +24,8 @@ void setup() {
   strokeJoin(ROUND);
   randomSeed(3);
 
-  imgName = "vt1.png";
-  totalCluster= 50;
+  imgName = "lena.gif";
+  totalCluster= 30;
   totalWorm = 600;
 
   loadImg(imgName);

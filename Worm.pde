@@ -29,14 +29,14 @@ class Worm {
     this.v = v;
     this.clusters = clusters;
     this.pointIndexes = pointIndexes;
-    this.strokeWeight = 3.0f;
+    this.strokeWeight = 1.0f;
     this.strokeOpacity = 128.0;
-    this.seekRadius = 4;
+    this.seekRadius = 9;
     this.edgeCount = 0;
     this.stepCount = 0;
     this.G = 10.0;
 
-    this.step = this.seekRadius / 1.66;
+    this.step = this.seekRadius / 2.0;//1.66;
 
     this.rgb = Lab2RGB(this.c);
   }
@@ -97,7 +97,7 @@ class Worm {
         this.step = this.seekRadius / 2.7;
       }*/
 
-      if (angleBetween > 120 && PVector.dist(aColor, this.c) > 0.00001) {
+      if (angleBetween > 190 && PVector.dist(aColor, this.c) > 0.00001) {
         if (this.edgeCount < 2) {
           this.edgeCount++;
         } else {
@@ -152,8 +152,37 @@ class Worm {
               this.prevPos = this.pos;
               this.pos = tmp;
               newPos = seek();
+              
+              newPosIndex = (int)(newPos.x * imgWidth) + (int)newPos.y;
+              if (visitedDepth[newPosIndex] < MAX_VISITED_DEPTH) {
+                PVector newPosColor = clusterColor.get(nearestCluster[newPosIndex]);
+                if (PVector.dist(this.c, newPosColor) < 0.00001) {
+                  visitedDepth[newPosIndex]++;
+                }
+              } else {
+                if (this.pointIndexes.contains(newPosIndex)) {
+                  this.pointIndexes.remove(new Integer(newPosIndex));
+                }
+                
+                if (this.pointIndexes.size() == 0)
+                  return;
+              }
             } else {
               newPos = seek();
+              int newPosIndex = (int)(newPos.x * imgWidth) + (int)newPos.y;
+              if (visitedDepth[newPosIndex] < MAX_VISITED_DEPTH) {
+                PVector newPosColor = clusterColor.get(nearestCluster[newPosIndex]);
+                if (PVector.dist(this.c, newPosColor) < 0.00001) {
+                  visitedDepth[newPosIndex]++;
+                }
+              } else {
+                if (this.pointIndexes.contains(newPosIndex)) {
+                  this.pointIndexes.remove(new Integer(newPosIndex));
+                }
+                
+                if (this.pointIndexes.size() == 0)
+                  return;
+              }
             }
           }
 
@@ -172,6 +201,10 @@ class Worm {
       } else {
         if (this.pointIndexes.contains(newPosIndex)) {
           this.pointIndexes.remove(new Integer(newPosIndex));
+          depthCount++;
+          println(depthCount);
+          if ((float)depthCount / totalPixel > 0.3)
+            noLoop();
         }
         
         if (this.pointIndexes.size() == 0)
@@ -222,6 +255,10 @@ class Worm {
 
         float limitWeight = (0.25 + 2.75 * limit);
         float limitOpacity = (20 + 235 * limit);
+        
+        this.strokeWeight *= (1 + factor);
+        this.strokeOpacity *= (1 + factor);
+        
         if (factor >= 0) {
           this.strokeWeight = this.strokeWeight > limitWeight ? limitWeight : this.strokeWeight;
           this.strokeOpacity = this.strokeOpacity > limitOpacity ? limitOpacity : this.strokeOpacity;
@@ -229,8 +266,6 @@ class Worm {
           this.strokeWeight = this.strokeWeight < limitWeight ? limitWeight : this.strokeWeight;
           this.strokeOpacity = this.strokeOpacity < limitOpacity ? limitOpacity : this.strokeOpacity;
         }
-        this.strokeWeight *= (1 + factor);
-        this.strokeOpacity *= (1 + factor);
 
         this.strokeWeight = this.strokeWeight > 3 ? 3 : this.strokeWeight;
         this.strokeOpacity = this.strokeOpacity > 255 ? 255 : this.strokeOpacity;
@@ -263,8 +298,12 @@ class Worm {
     this.prevPos = this.pos;
     this.pos = newPos;
     if (newPos.x < 0 || newPos.x >= imgHeight || newPos.y < 0 || newPos.y >= imgWidth) {
-      this.pos = new PVector((int)random(0, imgHeight), (int)(random(0, imgWidth)));
+      int newPosIndex = this.pointIndexes.get((int)random(0, this.pointIndexes.size()));
+      this.pos = new PVector(newPosIndex / imgWidth, newPosIndex % imgWidth);
       this.prevPos = new PVector(this.pos.x, this.pos.y);
+      
+      //this.pos = new PVector((int)random(0, imgHeight), (int)(random(0, imgWidth)));
+      //this.prevPos = new PVector(this.pos.x, this.pos.y);
       this.edgeCount = 0;
     }
   }

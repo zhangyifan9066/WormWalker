@@ -11,9 +11,10 @@ ArrayList<PVector> clusterColor;
 int[] nearestCluster;
 PVector[] pixelColor;
 int[] visitedDepth;
+int depthCount;
 
 float MAX_LAB_ABERRATION = PVector.dist(new PVector(0.0, -128.0, -128.0), new PVector(100.0, 127.0, 127.0));
-int MAX_VISITED_DEPTH = 3;
+int MAX_VISITED_DEPTH = 1;
 
 ArrayList<ArrayList<Integer>> colorGroup;
 ArrayList<ArrayList<Cluster>> positionGroup;
@@ -25,7 +26,7 @@ void setup() {
   randomSeed(3);
 
   imgName = "lena.gif";
-  totalCluster= 30;
+  totalCluster= 15;
   totalWorm = 600;
 
   loadImg(imgName);
@@ -34,6 +35,7 @@ void setup() {
   for (int i = 0; i < totalPixel; i++) {
     visitedDepth[i] = 0;
   }
+  depthCount = 0;
 
   Kmeans kmeans = new Kmeans(totalCluster);
   kmeans.act();
